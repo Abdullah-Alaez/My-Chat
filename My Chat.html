@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat-App</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+    }
+    .container {
+      display: flex;
+      height: 100vh;
+    }
+    .sidebar {
+      width: 30%;
+      background-color: #075E54;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+    .sidebar-header {
+      padding: 15px;
+      font-size: 18px;
+      font-weight: bold;
+      background-color: #128C7E;
+    }
+    .contact {
+      padding: 10px;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .contact:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    .chat {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background-color: #e5ddd5;
+    }
+    .chat-header {
+      padding: 15px;
+      background-color: #128C7E;
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .messages {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .message {
+      margin-bottom: 10px;
+      max-width: 70%;
+      padding: 10px;
+      border-radius: 8px;
+    }
+    .message.sent {
+      background-color: #dcf8c6;
+      align-self: flex-end;
+    }
+    .message.received {
+      background-color: white;
+      align-self: flex-start;
+    }
+    .chat-input {
+      display: flex;
+      padding: 10px;
+      background-color: #f0f0f0;
+      border-top: 1px solid #ccc;
+    }
+    .chat-input input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 20px;
+      outline: none;
+    }
+    .chat-input button {
+      margin-left: 10px;
+      padding: 10px 20px;
+      background-color: #128C7E;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+    }
+    .chat-input button:hover {
+      background-color: #0b6e58;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="sidebar">
+      <div class="sidebar-header">Kontakte</div>
+      <div class="contact">Abddullah Alaez</div>
+      <div class="contact">Judi Idris</div>
+      <div class="contact">Rudina Idris</div>
+      <div class="contact">Mohamad Ali Arafa</div>
+      <div class="contact">Lana Idris</div>
+    </div>
+    <div class="chat">
+      <div class="chat-header">Unserer Gruppe</div>
+      <div class="messages" id="messages">
+        <div class="message received">Hallo!</div>
+        <div class="message sent">Hi, wie geht's?</div>
+      </div>
+      <div class="chat-input">
+        <input type="text" id="messageInput" placeholder="Nachricht eingeben...">
+        <button onclick="sendMessage()">Nachricht senden</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const ws = new WebSocket('ws://localhost:8080');
+
+    ws.onopen = () => {
+      console.log('Connected to the WebSocket server');
+    };
+
+    ws.onmessage = (event) => {
+      const messageContainer = document.createElement('div');
+      messageContainer.classList.add('message', 'received');
+      messageContainer.textContent = event.data;
+      document.getElementById('messages').appendChild(messageContainer);
+      // Scroll to the bottom
+      const messages = document.getElementById('messages');
+      messages.scrollTop = messages.scrollHeight;
+    };
+
+    function sendMessage() {
+      const input = document.getElementById('messageInput');
+      const message = input.value.trim();
+      if (message) {
+        // إرسال الرسالة إلى الخادم
+        ws.send(message);
+
+        // عرض الرسالة في الواجهة
+        const messageContainer = document.createElement('div');
+        messageContainer.classList.add('message', 'sent');
+        messageContainer.textContent = message;
+        document.getElementById('messages').appendChild(messageContainer);
+        input.value = '';
+        // Scroll to the bottom
+        const messages = document.getElementById('messages');
+        messages.scrollTop = messages.scrollHeight;
+      }
+    }
+  </script>
+</body>
